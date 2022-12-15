@@ -3,7 +3,11 @@ let ready = false;
 
 let myGrid;
 
+let myLoop = new Tone.Loop(loopCallback, '8n');
 
+function loopCallback(transportTime){
+    myGrid.nextColumn();
+}
 
 class GridSquare{
 
@@ -15,10 +19,11 @@ class GridSquare{
         this.selected = false;
     }
 
-    render(){
+    render(highlight){
         push();
         if(this.selected) fill('gray');
         else fill('white');
+        if(highlight) strokeWeight(6);
         rect(this.initX, this.initY, this.width, this.heigth);
         pop();
     }
@@ -43,6 +48,12 @@ class Grid{
 
     constructor(window_heigth, window_width, rows, cols) {
         this.resetGridGeometry(window_heigth, window_width, rows, cols);
+        this.currentColumn = 0;
+    }
+
+    nextColumn(){
+        this.currentColumn += 1;
+        this.currentColumn = this.currentColumn % this.cols;
     }
 
     resetGridGeometry(window_heigth, window_width, rows, cols){
@@ -87,7 +98,8 @@ class Grid{
     renderGrid(){
         for(let colIndex = 0 ; colIndex < (this.cols) ; colIndex ++)  {
             for(let rowIndex = 0 ; rowIndex < (this.rows) ; rowIndex ++)  {
-                this.squareMatrix[colIndex][rowIndex].render();
+                let highlight = this.currentColumn === colIndex;
+                this.squareMatrix[colIndex][rowIndex].render(highlight);
             }
         }
     }
@@ -119,6 +131,7 @@ function initializeAudio() {
     Tone.Master.volume.value = -9; // turn it down a bit
     Tone.Transport.bpm.value = 60; // default 120
     Tone.Transport.start();
+    myLoop.start();
 }
 
 
