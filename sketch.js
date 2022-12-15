@@ -2,11 +2,11 @@ let ready = false;
 
 let myGrid;
 
-
 let instruments = [Tone.Synth, Tone.MetalSynth, Tone.MembraneSynth]
 let notes = ['C4', 'E4', 'G4', 'B4', 'C5', 'E5', 'G5', 'B5']
 
 
+let BPMSlider;
 
 let myLoop = new Tone.Loop(loopCallback, '8n');
 
@@ -152,16 +152,22 @@ class Grid{
 function setup() {
     createCanvas(windowWidth, windowHeight);
     myGrid = new Grid(windowHeight, windowWidth, 6,3 );
+    BPMSlider = createSlider(60,180,120);
+    BPMSlider.position(myGrid.initX+(myGrid.width/2)- (BPMSlider.width/2) , myGrid.initY+myGrid.heigth+10);
+    BPMSlider.hide()
+    BPMSlider.input(changeBPM);
 }
 
-
+function changeBPM(){
+    Tone.Transport.bpm.value = BPMSlider.value();
+}
 //-------------------------------------------------------
 function initializeAudio() {
     Tone.Master.volume.value = -9; // turn it down a bit
-    Tone.Transport.bpm.value = 60; // default 120
     Tone.start().then(()=>{
         Tone.Transport.start();
         myLoop.start();
+        BPMSlider.show();
     });
 
 }
