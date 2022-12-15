@@ -3,7 +3,30 @@ let ready = false;
 
 let myGrid;
 
+class GridSquare{
 
+    constructor(initX, initY, width, heigth) {
+        this.initX = initX
+        this.initY = initY
+        this.width = width
+        this.heigth = heigth
+    }
+
+    render(){
+        rect(this.initX, this.initY, this.width, this.heigth);
+    }
+
+    isInside(posX, posY){
+        let isInside = false;
+        if( (posX >= this.initX) && (posX<= this.initX + this.width)){
+            if( (posY >= this.initY) && (posY <= this.initY + this.heigth)){
+                isInside = true;
+            }
+        }
+        return isInside
+    }
+
+}
 
 class Grid{
 
@@ -16,6 +39,25 @@ class Grid{
         this.cols = cols;
         this.setGridCoordinates(window_heigth, window_width);
         this.setGridDimentions(window_heigth, window_width);
+        this.setupSquares();
+    }
+
+    setupSquares(){
+        let current_initPosX = this.initX;
+        let current_initPosY = this.initY;
+        this.squareMatrix = []
+
+        for(let colIndex = 0 ; colIndex < (this.cols) ; colIndex ++)  {
+            let squareColumn = []
+            for(let rowIndex = 0 ; rowIndex < (this.rows) ; rowIndex ++)  {
+                let currSquare = new GridSquare(current_initPosX,current_initPosY, this.squareWidth, this.squareHeigth);
+                squareColumn.push(currSquare);
+                current_initPosY += this.squareHeigth;
+            }
+            this.squareMatrix.push(squareColumn);
+            current_initPosX += this.squareWidth;
+            current_initPosY -= (this.squareHeigth * this.rows);
+        }
     }
 
     setGridDimentions(window_heigth, window_width){
@@ -32,20 +74,20 @@ class Grid{
 
 
     renderGrid(){
-        let current_initPosX = this.initX;
-        let current_initPosY = this.initY;
-
-
         for(let colIndex = 0 ; colIndex < (this.cols) ; colIndex ++)  {
             for(let rowIndex = 0 ; rowIndex < (this.rows) ; rowIndex ++)  {
-                rect(current_initPosX,current_initPosY, this.squareWidth, this.squareHeigth);
-                current_initPosY += this.squareHeigth
+                this.squareMatrix[colIndex][rowIndex].render();
             }
-            current_initPosX += this.squareWidth
-            current_initPosY -= (this.squareHeigth * this.rows)
         }
     }
 
+    checkSquareClick(clickX, clickY){
+        for(let colIndex = 0 ; colIndex < (this.cols) ; colIndex ++)  {
+            for(let rowIndex = 0 ; rowIndex < (this.rows) ; rowIndex ++)  {
+                console.log(this.squareMatrix[colIndex][rowIndex].isInside(clickX,clickY));
+            }
+        }
+    }
 
 }
 
@@ -95,8 +137,8 @@ function mousePressed(event) {
         ready = true;
     } else {
 
-       console.log(event.clientX)
-       console.log(event.clientY)
+       myGrid.checkSquareClick(event.clientX,event.clientY);
+
     }
 }
 
