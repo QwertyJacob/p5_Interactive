@@ -1,22 +1,38 @@
 let ready = false;
 
-
 let myGrid;
+
+
+let instruments = [Tone.Synth, Tone.MetalSynth, Tone.MembraneSynth]
+let notes = ['C4', 'E4', 'G4', 'B4', 'C5', 'E5', 'G5', 'B5']
+
 
 let myLoop = new Tone.Loop(loopCallback, '8n');
 
+
 function loopCallback(transportTime){
     myGrid.nextColumn();
+    myGrid.play(transportTime);
 }
+
+
+
 
 class GridSquare{
 
-    constructor(initX, initY, width, heigth) {
+    constructor(initX, initY, width, heigth, instrument, note) {
         this.initX = initX;
         this.initY = initY;
         this.width = width;
         this.heigth = heigth;
         this.selected = false;
+        this.instrument = new instrument();
+        this.instrument.toDestination();
+        this.note = note;
+    }
+
+    play(transportTime){
+        this.instrument.triggerAttackRelease(this.note, '8n', transportTime);
     }
 
     render(highlight){
@@ -51,6 +67,15 @@ class Grid{
         this.currentColumn = 0;
     }
 
+    play(transportTime){
+        for(let rowIndex = 0 ; rowIndex < (this.rows) ; rowIndex ++)  {
+            let currSquare = this.squareMatrix[this.currentColumn][rowIndex];
+            if(currSquare.selected){
+                currSquare.play(transportTime);
+            }
+        }
+    }
+
     nextColumn(){
         this.currentColumn += 1;
         this.currentColumn = this.currentColumn % this.cols;
@@ -72,7 +97,11 @@ class Grid{
         for(let colIndex = 0 ; colIndex < (this.cols) ; colIndex ++)  {
             let squareColumn = []
             for(let rowIndex = 0 ; rowIndex < (this.rows) ; rowIndex ++)  {
-                let currSquare = new GridSquare(current_initPosX,current_initPosY, this.squareWidth, this.squareHeigth);
+                let currInstrument = instruments[colIndex];
+                let currNote = notes[rowIndex];
+                let currSquare = new GridSquare(current_initPosX,current_initPosY,
+                                                this.squareWidth, this.squareHeigth,
+                                                currInstrument, currNote);
                 squareColumn.push(currSquare);
                 current_initPosY += this.squareHeigth;
             }
