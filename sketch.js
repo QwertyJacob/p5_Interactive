@@ -3,17 +3,24 @@ let ready = false;
 
 let myGrid;
 
+
+
 class GridSquare{
 
     constructor(initX, initY, width, heigth) {
-        this.initX = initX
-        this.initY = initY
-        this.width = width
-        this.heigth = heigth
+        this.initX = initX;
+        this.initY = initY;
+        this.width = width;
+        this.heigth = heigth;
+        this.selected = false;
     }
 
     render(){
+        push();
+        if(this.selected) fill('gray');
+        else fill('white');
         rect(this.initX, this.initY, this.width, this.heigth);
+        pop();
     }
 
     isInside(posX, posY){
@@ -24,6 +31,10 @@ class GridSquare{
             }
         }
         return isInside
+    }
+
+    toogleSelection(){
+        this.selected = !this.selected;
     }
 
 }
@@ -84,7 +95,10 @@ class Grid{
     checkSquareClick(clickX, clickY){
         for(let colIndex = 0 ; colIndex < (this.cols) ; colIndex ++)  {
             for(let rowIndex = 0 ; rowIndex < (this.rows) ; rowIndex ++)  {
-                console.log(this.squareMatrix[colIndex][rowIndex].isInside(clickX,clickY));
+                let currentSquare = this.squareMatrix[colIndex][rowIndex];
+                if(currentSquare.isInside(clickX,clickY)){
+                    currentSquare.toogleSelection();
+                }
             }
         }
     }
