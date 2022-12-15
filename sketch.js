@@ -7,8 +7,8 @@ let instruments = [Tone.Synth, Tone.MetalSynth, Tone.MembraneSynth]
 let notes = ['C4', 'E4', 'G4', 'B4', 'C5', 'E5', 'G5', 'B5']
 
 
-let myLoop = new Tone.Loop(loopCallback, '8n');
 
+let myLoop = new Tone.Loop(loopCallback, '8n');
 
 function loopCallback(transportTime){
     myGrid.nextColumn();
@@ -151,7 +151,7 @@ class Grid{
 // Create a new canvas to match the browser size
 function setup() {
     createCanvas(windowWidth, windowHeight);
-    myGrid = new Grid(windowHeight, windowWidth, 3,3 );
+    myGrid = new Grid(windowHeight, windowWidth, 6,3 );
 }
 
 
@@ -159,8 +159,11 @@ function setup() {
 function initializeAudio() {
     Tone.Master.volume.value = -9; // turn it down a bit
     Tone.Transport.bpm.value = 60; // default 120
-    Tone.Transport.start();
-    myLoop.start();
+    Tone.start().then(()=>{
+        Tone.Transport.start();
+        myLoop.start();
+    });
+
 }
 
 
