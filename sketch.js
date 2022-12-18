@@ -1,6 +1,7 @@
 let ready = false;
 
 let myGrid;
+let resetBtn;
 
 let notes = ['C1', 'E1', 'G1', 'B1',
                 'C2','E2', 'G2', 'B2',
@@ -128,7 +129,6 @@ class Grid{
         this.initY = window_heigth/4;
     }
 
-
     renderGrid(){
         for(let colIndex = 0 ; colIndex < (this.cols) ; colIndex ++)  {
             for(let rowIndex = 0 ; rowIndex < (this.rows) ; rowIndex ++)  {
@@ -149,6 +149,14 @@ class Grid{
         }
     }
 
+    resetSelection(){
+        for(let colIndex = 0 ; colIndex < (this.cols) ; colIndex ++)  {
+            for(let rowIndex = 0 ; rowIndex < (this.rows) ; rowIndex ++)  {
+                this.squareMatrix[colIndex][rowIndex].selected = false;
+            }
+        }
+    }
+
 }
 
 
@@ -159,6 +167,7 @@ function setup() {
     myGrid = new Grid(windowHeight, windowWidth, 24,3 , Tone.Synth);
     createBPMSlider();
     //createAddRowBtn();
+    createResetButton();
 }
 
 function createBPMSlider(){
@@ -181,6 +190,19 @@ function createAddRowBtn(){
     addRowBtn.mousePressed(addRow);
 }
 
+function createResetButton(){
+    resetBtn = createButton("Reset");
+    let initXForBtn = myGrid.initX + (myGrid.width/2)- (resetBtn.width/2)
+    let initYForBtn = 10
+    resetBtn.position(initXForBtn , initYForBtn);
+    resetBtn.hide()
+    resetBtn.mousePressed(resetSelection);
+}
+
+function resetSelection(){
+    myGrid.resetSelection()
+}
+
 function changeBPM(){
     Tone.Transport.bpm.value = BPMSlider.value();
 }
@@ -200,6 +222,8 @@ function initializeAudio() {
         myLoop.start();
         BPMSlider.show();
         //addRowBtn.show();
+        resetBtn.show();
+
     });
 
 }
