@@ -168,6 +168,10 @@ function createBPMSlider(){
     BPMSlider.input(changeBPM);
 }
 
+function resetPositions(){
+    BPMSlider.position(myGrid.initX+(myGrid.width/2)- (BPMSlider.width/2) , myGrid.initY+myGrid.heigth+10);
+}
+
 function createAddRowBtn(){
     addRowBtn = createButton("Add Row!!");
     let initXForBtn = myGrid.initX + (myGrid.width/2)- (addRowBtn.width/2)
@@ -206,6 +210,7 @@ function initializeAudio() {
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
     myGrid.resetGridGeometry(windowHeight,windowWidth,myGrid.rows, myGrid.cols);
+    resetPositions();
 }
 
 //-------------------------------------------------------
