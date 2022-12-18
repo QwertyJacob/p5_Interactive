@@ -1,6 +1,6 @@
 let ready = false;
 
-let myGrid;
+let myPlayGround;
 let resetBtn;
 
 let notes = ['C1', 'E1', 'G1', 'B1',
@@ -13,15 +13,6 @@ let notes = ['C1', 'E1', 'G1', 'B1',
 
 
 let BPMSlider;
-
-let myLoop = new Tone.Loop(loopCallback, '8n');
-
-function loopCallback(transportTime){
-    myGrid.nextColumn();
-    myGrid.play(transportTime);
-}
-
-
 
 
 class GridSquare{
@@ -68,10 +59,11 @@ class GridSquare{
 
 class Grid{
 
-    constructor(window_heigth, window_width, rows, cols, instrument) {
+    constructor(initX, initY, width, height, rows, cols, instrument) {
         this.instrument =  instrument;
-        this.resetGridGeometry(window_heigth, window_width, rows, cols);
         this.currentColumn = 0;
+        this.rows = rows;
+        this.cols = cols;
     }
 
     play(transportTime){
@@ -88,12 +80,12 @@ class Grid{
         this.currentColumn = this.currentColumn % this.cols;
     }
 
-    resetGridGeometry(window_heigth, window_width, rows, cols){
-        console.log('resetting grid')
-        this.rows = rows;
-        this.cols = cols;
-        this.setGridCoordinates(window_heigth, window_width);
-        this.setGridDimentions(window_heigth, window_width);
+    resetGridGeometry(initX, initY, width, height){
+        this.initX = initX;
+        this.initY = initY;
+        this.width = width
+        this.heigth = height;
+        this.setSquareDimentions();
         this.setupSquares();
     }
 
@@ -117,19 +109,13 @@ class Grid{
         }
     }
 
-    setGridDimentions(window_heigth, window_width){
-        this.width = window_width/2;
-        this.heigth = window_heigth/2;
+    setSquareDimentions(){
         this.squareWidth = this.width / this.cols;
         this.squareHeigth  = this.heigth / this.rows;
     }
 
-    setGridCoordinates(window_heigth, window_width){
-        this.initX = window_width/4;
-        this.initY = window_heigth/4;
-    }
-
     renderGrid(){
+
         for(let colIndex = 0 ; colIndex < (this.cols) ; colIndex ++)  {
             for(let rowIndex = 0 ; rowIndex < (this.rows) ; rowIndex ++)  {
                 let highlight = this.currentColumn === colIndex;
@@ -159,12 +145,70 @@ class Grid{
 
 }
 
+class Playground{
+    constructor(grids, initInterval, window_width,window_heigth) {
+        this.grids = grids;
+        this.resetGeometry(window_width,window_heigth)
+        this.loop = new Tone.Loop(this.loopCallback, initInterval);
+        this.loop.playground = this;
+    }
+
+    setGridsSize(){
+        this.gridWidth = this.width;
+        this.gridHeight = this.height / this.grids.length;
+    }
+
+    renderPlayground(){
+        this.grids.forEach(function (item, index) {
+            item.renderGrid()
+        });
+    }
+
+    loopCallback(transportTime){
+        this.playground.grids.forEach(function (item, index) {
+            item.nextColumn();
+            item.play(transportTime);
+        });
+    }
+
+    resetSelection(){
+        this.grids.forEach(function (item, index) {
+            item.resetSelection();
+        });
+    }
+
+    resetGeometry(window_width,window_heigth){
+        this.width = window_width / 1.25;
+        this.height = window_heigth / 1.5;
+        this.initX = (window_width/2) - (this.width/2);
+        this.initY = (window_heigth/2) - (this.height/2);
+        this.setGridsSize();
+        let currX = this.initX;
+        let currY = this.initY;
+
+        for(let item of this.grids){
+            item.resetGridGeometry(currX, currY, this.gridWidth, this.gridHeight);
+            currY = currY + this.gridHeight + 10;
+        }
+    }
+
+    selectOnClick(xCoord, yCoord){
+        this.grids.forEach(function (item, index) {
+            item.checkSquareClick(xCoord,yCoord);
+        });
+    }
+
+}
 
 //-------------------------------------------------------
 // Create a new canvas to match the browser size
 function setup() {
     createCanvas(windowWidth, windowHeight);
-    myGrid = new Grid(windowHeight, windowWidth, 24,3 , Tone.Synth);
+
+    myPlayGround = new Playground([new Grid(windowHeight, windowWidth, 10,3 , 15,15 ,Tone.Synth),
+                                        new Grid(windowHeight, windowWidth, 10,3 , 15,15 ,Tone.MembraneSynth)],
+                                '8n',
+                                windowWidth, windowHeight)
     createBPMSlider();
     //createAddRowBtn();
     createResetButton();
@@ -172,27 +216,20 @@ function setup() {
 
 function createBPMSlider(){
     BPMSlider = createSlider(60,180,120);
-    BPMSlider.position(myGrid.initX+(myGrid.width/2)- (BPMSlider.width/2) , myGrid.initY+myGrid.heigth+10);
+    BPMSlider.position(myPlayGround.initX+(myPlayGround.width/2)- (BPMSlider.width/2) ,40);
     BPMSlider.hide()
     BPMSlider.input(changeBPM);
 }
 
 function resetPositions(){
-    BPMSlider.position(myGrid.initX+(myGrid.width/2)- (BPMSlider.width/2) , myGrid.initY+myGrid.heigth+10);
-}
+    resetBtn.position( myPlayGround.initX + (myPlayGround.width/2)- (resetBtn.width/2) , 10);
+    BPMSlider.position(myPlayGround.initX+(myPlayGround.width/2)- (BPMSlider.width/2) , 40);
 
-function createAddRowBtn(){
-    addRowBtn = createButton("Add Row!!");
-    let initXForBtn = myGrid.initX + (myGrid.width/2)- (addRowBtn.width/2)
-    let initYForBtn = 10
-    addRowBtn.position(initXForBtn , initYForBtn);
-    addRowBtn.hide()
-    addRowBtn.mousePressed(addRow);
 }
 
 function createResetButton(){
     resetBtn = createButton("Reset");
-    let initXForBtn = myGrid.initX + (myGrid.width/2)- (resetBtn.width/2)
+    let initXForBtn = myPlayGround.initX + (myPlayGround.width/2)- (resetBtn.width/2)
     let initYForBtn = 10
     resetBtn.position(initXForBtn , initYForBtn);
     resetBtn.hide()
@@ -200,18 +237,13 @@ function createResetButton(){
 }
 
 function resetSelection(){
-    myGrid.resetSelection()
+    myPlayGround.resetSelection()
 }
 
 function changeBPM(){
     Tone.Transport.bpm.value = BPMSlider.value();
 }
 
-function addRow(){
-    if (myGrid.rows < notes.length){
-        myGrid.resetGridGeometry(windowHeight,windowWidth,myGrid.rows+1, myGrid.cols);
-    }
-}
 
 
 //-------------------------------------------------------
@@ -219,7 +251,7 @@ function initializeAudio() {
     Tone.Master.volume.value = -9; // turn it down a bit
     Tone.start().then(()=>{
         Tone.Transport.start();
-        myLoop.start();
+        myPlayGround.loop.start();
         BPMSlider.show();
         //addRowBtn.show();
         resetBtn.show();
@@ -233,7 +265,7 @@ function initializeAudio() {
 // On window resize, update the canvas size
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
-    myGrid.resetGridGeometry(windowHeight,windowWidth,myGrid.rows, myGrid.cols);
+    myPlayGround.resetGeometry(windowWidth,windowHeight);
     resetPositions();
 }
 
@@ -249,7 +281,7 @@ function draw() {
         background('black');
         stroke("green");
         strokeWeight(3)
-        myGrid.renderGrid();
+        myPlayGround.renderPlayground();
     }
 }
 
@@ -258,8 +290,7 @@ function mousePressed(event) {
         initializeAudio();
         ready = true;
     } else {
-
-       myGrid.checkSquareClick(event.clientX,event.clientY);
+        myPlayGround.selectOnClick(event.clientX,event.clientY);
 
     }
 }
