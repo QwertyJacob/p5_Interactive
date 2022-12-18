@@ -2,12 +2,16 @@ let ready = false;
 
 let myGrid;
 
-let instruments = [Tone.Synth, Tone.MetalSynth, Tone.MembraneSynth]
-let notes = ['C4', 'E4', 'G4', 'B4', 'C5', 'E5', 'G5', 'B5']
+let notes = ['C1', 'E1', 'G1', 'B1',
+                'C2','E2', 'G2', 'B2',
+                'C3', 'E3', 'G3', 'B3',
+                'C4', 'E4', 'G4', 'B4',
+                'C5', 'E5', 'G5', 'B5',
+                'C6', 'E6', 'G6', 'B6',
+                'C7', 'E7', 'G7', 'B7']
 
 
 let BPMSlider;
-let addRowBtn;
 
 let myLoop = new Tone.Loop(loopCallback, '8n');
 
@@ -63,7 +67,8 @@ class GridSquare{
 
 class Grid{
 
-    constructor(window_heigth, window_width, rows, cols) {
+    constructor(window_heigth, window_width, rows, cols, instrument) {
+        this.instrument =  instrument;
         this.resetGridGeometry(window_heigth, window_width, rows, cols);
         this.currentColumn = 0;
     }
@@ -95,15 +100,13 @@ class Grid{
         let current_initPosX = this.initX;
         let current_initPosY = this.initY;
         this.squareMatrix = []
-
         for(let colIndex = 0 ; colIndex < (this.cols) ; colIndex ++)  {
             let squareColumn = []
             for(let rowIndex = 0 ; rowIndex < (this.rows) ; rowIndex ++)  {
-                let currInstrument = instruments[colIndex];
                 let currNote = notes[rowIndex];
                 let currSquare = new GridSquare(current_initPosX,current_initPosY,
                                                 this.squareWidth, this.squareHeigth,
-                                                currInstrument, currNote);
+                                                this.instrument, currNote);
                 squareColumn.push(currSquare);
                 current_initPosY += this.squareHeigth;
             }
@@ -153,9 +156,9 @@ class Grid{
 // Create a new canvas to match the browser size
 function setup() {
     createCanvas(windowWidth, windowHeight);
-    myGrid = new Grid(windowHeight, windowWidth, 6,3 );
+    myGrid = new Grid(windowHeight, windowWidth, 24,3 , Tone.Synth);
     createBPMSlider();
-    createAddRowBtn();
+    //createAddRowBtn();
 }
 
 function createBPMSlider(){
@@ -192,7 +195,7 @@ function initializeAudio() {
         Tone.Transport.start();
         myLoop.start();
         BPMSlider.show();
-        addRowBtn.show();
+        //addRowBtn.show();
     });
 
 }
