@@ -64,6 +64,7 @@ class Grid{
         this.currentColumn = 0;
         this.rows = rows;
         this.cols = cols;
+        this.resetGridGeometry(initX, initY, width, height);
     }
 
     play(transportTime){
@@ -146,16 +147,16 @@ class Grid{
 }
 
 class Playground{
-    constructor(grids, initInterval, window_width,window_heigth) {
-        this.grids = grids;
-        this.resetGeometry(window_width,window_heigth)
+    constructor(instruments, initInterval, window_width,window_heigth) {
+        this.instruments = instruments;
+        this.resetPlayGround(window_width,window_heigth)
         this.loop = new Tone.Loop(this.loopCallback, initInterval);
         this.loop.playground = this;
     }
 
     setGridsSize(){
         this.gridWidth = this.width;
-        this.gridHeight = this.height / this.grids.length;
+        this.gridHeight = this.height / this.instruments.length;
     }
 
     renderPlayground(){
@@ -177,17 +178,18 @@ class Playground{
         });
     }
 
-    resetGeometry(window_width,window_heigth){
+    resetPlayGround(window_width, window_heigth){
+
         this.width = window_width / 1.25;
         this.height = window_heigth / 1.5;
         this.initX = (window_width/2) - (this.width/2);
         this.initY = (window_heigth/2) - (this.height/2);
         this.setGridsSize();
+        this.grids = [];
         let currX = this.initX;
         let currY = this.initY;
-
-        for(let item of this.grids){
-            item.resetGridGeometry(currX, currY, this.gridWidth, this.gridHeight);
+        for(let instrument of this.instruments){
+            this.grids.push(new Grid(currX, currY, this.gridWidth, this.gridHeight, 15,8, instrument));
             currY = currY + this.gridHeight + 10;
         }
     }
@@ -205,8 +207,7 @@ class Playground{
 function setup() {
     createCanvas(windowWidth, windowHeight);
 
-    myPlayGround = new Playground([new Grid(windowHeight, windowWidth, 10,3 , 15,15 ,Tone.Synth),
-                                        new Grid(windowHeight, windowWidth, 10,3 , 15,15 ,Tone.MembraneSynth)],
+    myPlayGround = new Playground([Tone.Synth, Tone.MembraneSynth],
                                 '8n',
                                 windowWidth, windowHeight)
     createBPMSlider();
@@ -265,7 +266,7 @@ function initializeAudio() {
 // On window resize, update the canvas size
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
-    myPlayGround.resetGeometry(windowWidth,windowHeight);
+    myPlayGround.resetPlayGround(windowWidth,windowHeight);
     resetPositions();
 }
 
